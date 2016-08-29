@@ -1,4 +1,4 @@
-const { serialize } = require('../../src/')
+const JsonImmutable = require('../../lib/')
 
 
 exports.testSerialization = function (test, data, expectedResult) {
@@ -7,6 +7,6 @@ exports.testSerialization = function (test, data, expectedResult) {
 }
 
 exports.getSerializationResult = function (data) {
-  const json = serialize(data)
+  const json = JsonImmutable.serialize(data)
   return JSON.parse(json)
 }
