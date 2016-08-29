@@ -1,6 +1,6 @@
 {
   "name": "json-immutable",
-  "version": "0.0.0",
+  "version": "0.0.0-a",
   "main": "lib/index",
   "scripts": {
     "prepublish": "babel src/ -d lib/",
