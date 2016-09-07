@@ -100,6 +100,18 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
 
     - `any`: Deserialized data.
 
+### Streaming API
+
+- **`createSerializationStream()`**
+
+    Arguments:
+
+    - `data`: The data to serialize.
+
+    Return value:
+
+    - `stream.PassThrough<!Buffer>`: A readable stream emitting the JSON representation of the input (`data`).
+
 ## Running Tests
 
 1. Clone the repository.

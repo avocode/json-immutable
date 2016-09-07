@@ -1,6 +1,8 @@
 const debug = require('debug')('json-immutable')
 const immutable = require('immutable')
 
+const JSONStreamStringify = require('json-stream-stringify')
+
 
 function deserialize(json, options = {}) {
   return JSON.parse(json, (key, value) => {
@@ -23,6 +25,12 @@ function serialize(data, options = {}) {
   const indentation = options.pretty ? 2 : 0
 
   return JSON.stringify(data, replace, indentation)
+}
+
+
+function createSerializationStream(data, options = {}) {
+  const stream = JSONStreamStringify(data, replace)
+  return stream
 }
 
 
@@ -155,4 +163,8 @@ function replacePlainObject(obj) {
 }
 
 
-module.exports = { deserialize, serialize }
+module.exports = {
+  createSerializationStream,
+  deserialize,
+  serialize
+}
