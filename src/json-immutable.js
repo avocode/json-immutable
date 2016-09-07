@@ -29,7 +29,7 @@ function serialize(data, options = {}) {
 
 
 function createSerializationStream(data, options = {}) {
-  const stream = JSONStreamStringify(data, replace)
+  const stream = JSONStreamStringify(data, replaceAsync)
   return stream
 }
 
@@ -62,6 +62,47 @@ function replace(key, value) {
   }
   else if (typeof value === 'object' && value !== null) {
     result = replacePlainObject(value, replace)
+  }
+
+  debug('result:', result, '\n---')
+  return result
+}
+
+function replaceAsync(key, value) {
+  debug('key:', key)
+  debug('value:', value)
+
+  let result = value
+
+  if (!(value instanceof Promise)) {
+    if (value instanceof immutable.Record) {
+      result = new Promise((resolve) => {
+        setImmediate(() => {
+          resolve(replaceRecord(value, replaceAsync))
+        })
+      })
+    }
+    else if (immutable.Iterable.isIterable(value)) {
+      result = new Promise((resolve) => {
+        setImmediate(() => {
+          resolve(replaceIterable(value, replaceAsync))
+        })
+      })
+    }
+    else if (Array.isArray(value)) {
+      result = new Promise((resolve) => {
+        setImmediate(() => {
+          resolve(replaceArray(value, replaceAsync))
+        })
+      })
+    }
+    else if (typeof value === 'object' && value !== null) {
+      result = new Promise((resolve) => {
+        setImmediate(() => {
+          resolve(replacePlainObject(value, replaceAsync))
+        })
+      })
+    }
   }
 
   debug('result:', result, '\n---')
