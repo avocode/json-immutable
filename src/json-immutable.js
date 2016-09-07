@@ -29,9 +29,10 @@ function serialize(data, options = {}) {
 
 
 function createSerializationStream(data, options = {}) {
+  const indentation = options.pretty ? 2 : 0
   const replacer = options.bigChunks ? replace : replaceAsync
 
-  const stream = JSONStreamStringify(data, replacer)
+  const stream = JSONStreamStringify(data, replacer, indentation)
   return stream
 }
 
