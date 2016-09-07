@@ -52,16 +52,16 @@ function replace(key, value) {
   let result = value
 
   if (value instanceof immutable.Record) {
-    result = replaceRecord(value)
+    result = replaceRecord(value, replace)
   }
   else if (immutable.Iterable.isIterable(value)) {
-    result = replaceIterable(value)
+    result = replaceIterable(value, replace)
   }
   else if (Array.isArray(value)) {
-    result = replaceArray(value)
+    result = replaceArray(value, replace)
   }
   else if (typeof value === 'object' && value !== null) {
-    result = replacePlainObject(value)
+    result = replacePlainObject(value, replace)
   }
 
   debug('result:', result, '\n---')
@@ -78,11 +78,11 @@ function reviveRecord(key, recInfo, options) {
   return RecordType(revive(key, recInfo['data'], options))
 }
 
-function replaceRecord(rec) {
+function replaceRecord(rec, replaceChild) {
   debug('replaceRecord()', rec)
   const recordDataMap = rec.toMap()
   const recordData = recordDataMap.map((value, key) => {
-    return replace(key, value)
+    return replaceChild(key, value)
   })
 
   if (!rec._name) {
@@ -117,10 +117,10 @@ function reviveIterable(key, iterInfo, options) {
   }
 }
 
-function replaceIterable(iter) {
+function replaceIterable(iter, replaceChild) {
   debug('replaceIterable()', iter)
   const iterableData = iter.map((value, key) => {
-    return replace(key, value)
+    return replaceChild(key, value)
   })
   const iterableType = iter.constructor.name
 
@@ -142,21 +142,21 @@ function replaceIterable(iter) {
 }
 
 
-function replaceArray(arr) {
+function replaceArray(arr, replaceChild) {
   debug('replaceArray()', arr)
 
   return arr.map((value, index) => {
-    return replace(index, value)
+    return replaceChild(index, value)
   })
 }
 
 
-function replacePlainObject(obj) {
+function replacePlainObject(obj, replaceChild) {
   debug('replacePlainObject()', obj)
 
   const objData = {}
   Object.keys(obj).forEach((key) => {
-    objData[key] = replace(key, obj[key])
+    objData[key] = replaceChild(key, obj[key])
   })
 
   return objData
