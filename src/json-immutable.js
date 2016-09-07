@@ -29,7 +29,9 @@ function serialize(data, options = {}) {
 
 
 function createSerializationStream(data, options = {}) {
-  const stream = JSONStreamStringify(data, replaceAsync)
+  const replacer = options.bigChunks ? replace : replaceAsync
+
+  const stream = JSONStreamStringify(data, replacer)
   return stream
 }
 

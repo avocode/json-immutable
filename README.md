@@ -107,6 +107,9 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     Arguments:
 
     - `data`: The data to serialize.
+    - `options={}`: Serialization options.
+        - `bigChunks=false`: Whether the serialized data should only be split into chunks based on the reader speed. By default, each data structure level is processed in its own event loop microtask which.
+            - NOTE: When `bigChunks=true`, a (possibly substantial) portion of the data is serialized synchronously.
 
     Return value:
 
