@@ -15,6 +15,11 @@ function revive(key, value, options) {
       return reviveRecord(key, value, options)
     } else if (value['__iterable']) {
       return reviveIterable(key, value, options)
+    } else if (value['__date']) {
+      return new Date(value['__date'])
+    } else if (value['__regexp']) {
+      const regExpParts = value['__regexp'].split('/')
+      return new RegExp(regExpParts[1], regExpParts[2])
     }
   }
   return value
