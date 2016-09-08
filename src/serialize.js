@@ -3,17 +3,33 @@ const immutable = require('immutable')
 
 const JSONStreamStringify = require('json-stream-stringify')
 
+const nativeTypeHelpers = require('./helpers/native-type-helpers')
+
 
 function serialize(data, options = {}) {
-  if (immutable.Iterable.isIterable(data) || data instanceof immutable.Record) {
+  if (immutable.Iterable.isIterable(data) ||
+      data instanceof immutable.Record ||
+      nativeTypeHelpers.isSupportedNativeType(data)
+  ) {
+    const patchedData = Object.create(data)
+
+    if (nativeTypeHelpers.isSupportedNativeType(data)) {
+      // NOTE: When native type (such as Date or RegExp) methods are called
+      //   on an `Object.create()`'d objects, invalid usage errors are thrown
+      //   in many cases. We need to patch the used methods to work
+      //   on originals.
+      nativeTypeHelpers.patchNativeTypeMethods(patchedData, data)
+    }
+
     // NOTE: JSON.stringify() calls the #toJSON() method of the root object.
     //   Immutable.JS provides its own #toJSON() implementation which does not
     //   preserve map key types.
-    data = Object.create(data)
-    data.toJSON = function () {
+    patchedData.toJSON = function () {
       debug('#toJSON()', this)
       return this
     }
+
+    data = patchedData
   }
 
   const indentation = options.pretty ? 2 : 0
@@ -45,6 +61,12 @@ function replace(key, value) {
   }
   else if (Array.isArray(value)) {
     result = replaceArray(value, replace)
+  }
+  else if (nativeTypeHelpers.isDate(value)) {
+    result = { '__date': value.toISOString() }
+  }
+  else if (nativeTypeHelpers.isRegExp(value)) {
+    result = { '__regexp': value.toString() }
   }
   else if (typeof value === 'object' && value !== null) {
     result = replacePlainObject(value, replace)

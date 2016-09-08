@@ -23,6 +23,19 @@ const json = serialize(data)
 const result = deserialize(json)
 ```
 
+### Native Object Types
+
+```javascript
+const data = { 'created_at': new Date('2016-09-08'), 'pattern': /iamnative/g }
+
+// Serialize
+const json = serialize(data)
+// json == '{"created_at":{"__date":"2016-09-08T00:00:00Z"},"pattern":{"__regexp":"/iamnative/g"}}'
+
+// Deserialize
+const result = deserialize(json)
+```
+
 ### Immutable Records
 
 ```javascript
