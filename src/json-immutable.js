@@ -125,14 +125,16 @@ function reviveRecord(key, recInfo, options) {
 function replaceRecord(rec, replaceChild) {
   debug('replaceRecord()', rec)
   const recordDataMap = rec.toMap()
-  const recordData = recordDataMap.map((value, key) => {
-    return replaceChild(key, value)
+  const recordData = {}
+
+  recordDataMap.forEach((value, key) => {
+    recordData[key] = replaceChild(key, value)
   })
 
   if (!rec._name) {
-    return recordData.toObject()
+    return recordData
   }
-  return { "__record": rec._name, "data": recordData.toObject() }
+  return { "__record": rec._name, "data": recordData }
 }
 
 
@@ -163,25 +165,33 @@ function reviveIterable(key, iterInfo, options) {
 
 function replaceIterable(iter, replaceChild) {
   debug('replaceIterable()', iter)
-  const iterableData = iter.map((value, key) => {
-    return replaceChild(key, value)
-  })
-  const iterableType = iter.constructor.name
 
+  const iterableType = iter.constructor.name
   switch (iterableType) {
   case 'List':
   case 'Set':
   case 'OrderedSet':
   case 'Stack':
-    return { "__iterable": iterableType, "data": iterableData.toArray() }
+    const listData = []
+    iter.forEach((value, key) => {
+      listData.push(replaceChild(key, value))
+    })
+    return { "__iterable": iterableType, "data": listData }
 
   case 'Map':
   case 'OrderedMap':
-    const mapEntrySeq = iterableData.entrySeq()
-    return { "__iterable": iterableType, "data": mapEntrySeq.toArray() }
+    const mapData = []
+    iter.forEach((value, key) => {
+      mapData.push([ key, replaceChild(key, value) ])
+    })
+    return { "__iterable": iterableType, "data": mapData }
 
   default:
-    return { "__iterable": iterableType, "data": iterableData.toObject() }
+    const iterData = {}
+    iter.forEach((value, key) => {
+      iterData[key] = replaceChild(key, value)
+    })
+    return { "__iterable": iterableType, "data": iterData }
   }
 }
 
