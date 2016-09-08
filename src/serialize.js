@@ -4,12 +4,6 @@ const immutable = require('immutable')
 const JSONStreamStringify = require('json-stream-stringify')
 
 
-function deserialize(json, options = {}) {
-  return JSON.parse(json, (key, value) => {
-    return revive(key, value, options)
-  })
-}
-
 function serialize(data, options = {}) {
   if (immutable.Iterable.isIterable(data) || data instanceof immutable.Record) {
     // NOTE: JSON.stringify() calls the #toJSON() method of the root object.
@@ -36,17 +30,6 @@ function createSerializationStream(data, options = {}) {
   return stream
 }
 
-
-function revive(key, value, options) {
-  if (typeof value === 'object' && value) {
-    if (value['__record']) {
-      return reviveRecord(key, value, options)
-    } else if (value['__iterable']) {
-      return reviveIterable(key, value, options)
-    }
-  }
-  return value
-}
 
 function replace(key, value) {
   debug('key:', key)
@@ -113,15 +96,6 @@ function replaceAsync(key, value) {
 }
 
 
-function reviveRecord(key, recInfo, options) {
-  const RecordType = options.recordTypes[recInfo['__record']]
-  if (!RecordType) {
-    throw new Error(`Unknown record type: ${recInfo['__record']}`)
-  }
-
-  return RecordType(revive(key, recInfo['data'], options))
-}
-
 function replaceRecord(rec, replaceChild) {
   debug('replaceRecord()', rec)
   const recordDataMap = rec.toMap()
@@ -137,31 +111,6 @@ function replaceRecord(rec, replaceChild) {
   return { "__record": rec._name, "data": recordData }
 }
 
-
-function reviveIterable(key, iterInfo, options) {
-  switch (iterInfo['__iterable']) {
-  case 'List':
-    return immutable.List(revive(key, iterInfo['data'], options))
-
-  case 'Set':
-    return immutable.Set(revive(key, iterInfo['data'], options))
-
-  case 'OrderedSet':
-    return immutable.OrderedSet(revive(key, iterInfo['data'], options))
-
-  case 'Stack':
-    return immutable.Stack(revive(key, iterInfo['data'], options))
-
-  case 'Map':
-    return immutable.Map(revive(key, iterInfo['data'], options))
-
-  case 'OrderedMap':
-    return immutable.OrderedMap(revive(key, iterInfo['data'], options))
-
-  default:
-    throw new Error(`Unknown iterable type: ${iterInfo['__iterable']}`)
-  }
-}
 
 function replaceIterable(iter, replaceChild) {
   debug('replaceIterable()', iter)
@@ -219,6 +168,5 @@ function replacePlainObject(obj, replaceChild) {
 
 module.exports = {
   createSerializationStream,
-  deserialize,
-  serialize
+  serialize,
 }
