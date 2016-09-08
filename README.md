@@ -100,6 +100,22 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
 
     - `any`: Deserialized data.
 
+### Streaming API
+
+- **`createSerializationStream()`**
+
+    Arguments:
+
+    - `data`: The data to serialize.
+    - `options={}`: Serialization options.
+        - `pretty=false`: Whether to pretty-print the result (2 spaces).
+        - `bigChunks=false`: Whether the serialized data should only be split into chunks based on the reader speed. By default, each data structure level is processed in its own event loop microtask which.
+            - NOTE: When `bigChunks=true`, a (possibly substantial) portion of the data is serialized synchronously.
+
+    Return value:
+
+    - `stream.PassThrough<!Buffer>`: A readable stream emitting the JSON representation of the input (`data`).
+
 ## Running Tests
 
 1. Clone the repository.
