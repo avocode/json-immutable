@@ -1,1 +1,4 @@
-module.exports = require('./json-immutable')
+module.exports = Object.assign({},
+  require('./deserialize'),
+  require('./serialize')
+)
