@@ -6,14 +6,17 @@ const JSONStreamStringify = require('json-stream-stringify')
 
 function serialize(data, options = {}) {
   if (immutable.Iterable.isIterable(data) || data instanceof immutable.Record) {
+    const patchedData = Object.create(data)
+
     // NOTE: JSON.stringify() calls the #toJSON() method of the root object.
     //   Immutable.JS provides its own #toJSON() implementation which does not
     //   preserve map key types.
-    data = Object.create(data)
-    data.toJSON = function () {
+    patchedData.toJSON = function () {
       debug('#toJSON()', this)
       return this
     }
+
+    data = patchedData
   }
 
   const indentation = options.pretty ? 2 : 0
