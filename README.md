@@ -62,7 +62,27 @@ const result = deserialize(json, {
 
 Record types can be named. This is utilized by the serializer/deserializer to revive `immutable.Record` objects. See the `SampleRecord` name passed into `immutable.Record()` as the second argument.
 
-NOTE: When an unknown record type is encountered during deserialization, an error is thrown.
+### Unknown Records
+
+```javascript
+const SampleRecord = immutable.Record(
+  { 'a': 3, 'b': 4 },
+  'SampleRecord'
+)
+
+const data = {
+  'x': SampleRecord({ 'a': 5 }),
+}
+
+// Serialize
+const json = serialize(data)
+// json == '{"x":{"__record":"SampleRecord","data":{"a":5}}}'
+
+// Deserialize
+const result = deserialize(json, {
+  parseUnknownRecords: true
+})
+```
 
 ### General Immutable Structures
 
@@ -108,6 +128,7 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     - `json`: A JSON representation of data.
     - `options={}`: Deserialization options.
         - `recordTypes={}`: `immutable.Record` factories.
+        - `parseUnknownRecords=true`: deserialize unknown `immutable.Record`
 
     Return value:
 
