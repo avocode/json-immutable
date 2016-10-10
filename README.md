@@ -62,7 +62,48 @@ const result = deserialize(json, {
 
 Record types can be named. This is utilized by the serializer/deserializer to revive `immutable.Record` objects. See the `SampleRecord` name passed into `immutable.Record()` as the second argument.
 
-NOTE: When an unknown record type is encountered during deserialization, an error is thrown.
+### Unknown Records
+
+```javascript
+const SampleRecord = immutable.Record(
+  { 'a': 3, 'b': 4 },
+  'SampleRecord'
+)
+
+const data = {
+  'x': SampleRecord({ 'a': 5 }),
+}
+
+// Serialize
+const json = serialize(data)
+// json == '{"x":{"__record":"SampleRecord","data":{"a":5}}}'
+
+// Deserialize
+const result = deserialize(json, {
+  parseUnknownRecords: true
+})
+```
+
+```javascript
+const UnnamedRecord = immutable.Record(
+  { 'a': 3, 'b': 4 }
+)
+
+const data = {
+  'x': UnnamedRecord({ 'a': 5 }),
+}
+
+// Serialize
+const json = serialize(data)
+// json == '{"x":{"a":5}}'
+const json2 = serialize(data, { storeUnknownRecords: true })
+// json == '{"x":{"__record":"__unknown","data":{"a":5}}}'
+
+// Deserialize
+const result = deserialize(json2, {
+  parseUnknownRecords: true
+})
+```
 
 ### General Immutable Structures
 
@@ -96,6 +137,7 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     - `data`: The data to serialize.
     - `options={}`: Serialization options.
         - `pretty=false`: Whether to pretty-print the result (2 spaces).
+        - `storeUnknownRecords=false`: Whether to save unnamed records as objects or records
 
     Return value:
 
@@ -108,6 +150,7 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     - `json`: A JSON representation of data.
     - `options={}`: Deserialization options.
         - `recordTypes={}`: `immutable.Record` factories.
+        - `parseUnknownRecords=true`: deserialize unknown `immutable.Record`
 
     Return value:
 
