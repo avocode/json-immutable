@@ -25,7 +25,6 @@ it('should deserialize a record of a known type', (test) => {
   })
 })
 
-
 it('should not deserialize a record of an unknown type', (test) => {
   const data = {
     '__record': 'SampleRecord',
@@ -42,6 +41,26 @@ it('should not deserialize a record of an unknown type', (test) => {
   })
 })
 
+
+it('should deserialize a record of an unknown type', (test) => {
+  const data = {
+    '__record': 'SampleRecord',
+    'data': {
+      'a': 5,
+      'b': 6,
+    },
+  }
+
+  const UnknownRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  })
+
+  helpers.testDeserialization(test, data, UnknownRecord(data['data']), {
+    recordTypes: {},
+    parseUnknownRecords: true
+  })
+})
 
 it('should deserialize nested records of known types', (test) => {
   const RecordA = immutable.Record({
@@ -75,5 +94,73 @@ it('should deserialize nested records of known types', (test) => {
       'RecordA': RecordA,
       'RecordB': RecordB,
     },
+  })
+})
+
+
+it('should deserialize nested records of unknown and know types', (test) => {
+  const RecordA = immutable.Record({
+    'a': 1,
+    'b': 2,
+  })
+  const RecordB = immutable.Record({
+    'c': 3,
+  }, 'RecordB')
+
+  const data = {
+    '__record': 'RecordA',
+    'data': {
+      'a': 5,
+      'b': {
+        '__record': 'RecordB',
+        'data': {
+          'c': 6,
+        },
+      },
+    },
+  }
+
+  const expectedResult = RecordA({
+    'a': data['data']['a'],
+    'b': RecordB(data['data']['b']['data']),
+  })
+
+  helpers.testDeserialization(test, data, expectedResult, {
+    recordTypes: {
+      'RecordB': RecordB,
+    },
+    parseUnknownRecords: true
+  })
+})
+
+it('should deserialize nested records of unknown types', (test) => {
+  const RecordA = immutable.Record({
+    'a': 1,
+    'b': 2,
+  })
+  const RecordB = immutable.Record({
+    'c': 3,
+  })
+
+  const data = {
+    '__record': 'RecordA',
+    'data': {
+      'a': 5,
+      'b': {
+        '__record': 'RecordB',
+        'data': {
+          'c': 6,
+        },
+      },
+    },
+  }
+
+  const expectedResult = RecordA({
+    'a': data['data']['a'],
+    'b': RecordB(data['data']['b']['data']),
+  })
+
+  helpers.testDeserialization(test, data, expectedResult, {
+    parseUnknownRecords: true
   })
 })

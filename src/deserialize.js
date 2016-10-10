@@ -27,8 +27,12 @@ function revive(key, value, options) {
 
 
 function reviveRecord(key, recInfo, options) {
-  const RecordType = options.recordTypes[recInfo['__record']]
+  const RecordType = options.recordTypes && options.recordTypes[recInfo['__record']]
   if (!RecordType) {
+    if (options.parseUnknownRecords) {
+      var TmpRecordType = new immutable.Record(recInfo['data']);
+      return TmpRecordType(revive(key, recInfo['data'], options))
+    }
     throw new Error(`Unknown record type: ${recInfo['__record']}`)
   }
 

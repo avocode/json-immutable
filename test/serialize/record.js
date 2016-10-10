@@ -47,6 +47,20 @@ it('should serialize an unnamed immutable.Record as a plain object',
   })
 })
 
+it('should serialize an unnamed immutable.Record as a Record',
+    (test) => {
+      const SampleRecord = immutable.Record({
+        'a': 5,
+        'b': 6,
+      })
+
+      const data = SampleRecord()
+      const result = helpers.getSerializationResult(data, { storeUnknownRecords: true })
+
+      test.is(result['__record'], '__unknown')
+      test.truthy(result['data'])
+    })
+
 
 it('should serialize a named immutable.Record data as a plain object',
     (test) => {
