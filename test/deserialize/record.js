@@ -26,6 +26,29 @@ it('should deserialize a record of a known type', (test) => {
 })
 
 
+it('should deserialize a record of a known class type', (test) => {
+  class SampleRecord extends immutable.Record({
+    'a': 1,
+    'b': 2,
+  }, 'SampleRecord') {
+  }
+
+  const data = {
+    '__record': 'SampleRecord',
+    'data': {
+      'a': 5,
+      'b': 6,
+    },
+  }
+
+  helpers.testDeserialization(test, data, new SampleRecord(data['data']), {
+    recordTypes: {
+      'SampleRecord': SampleRecord,
+    },
+  })
+})
+
+
 it('should not deserialize a record of an unknown type', (test) => {
   const data = {
     '__record': 'SampleRecord',

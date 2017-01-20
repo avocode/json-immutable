@@ -32,7 +32,7 @@ function reviveRecord(key, recInfo, options) {
     throw new Error(`Unknown record type: ${recInfo['__record']}`)
   }
 
-  return RecordType(revive(key, recInfo['data'], options))
+  return new RecordType(revive(key, recInfo['data'], options))
 }
 
 
