@@ -133,11 +133,40 @@ function replaceRecord(rec, replaceChild) {
   return { "__record": rec._name, "data": recordData }
 }
 
+function getIterableType(iterable) {
+  switch (iterable.constructor) {
+    case immutable.List:
+      return 'List'
+
+    case immutable.Set:
+      return 'Set'
+
+    case immutable.OrderedSet:
+      return 'OrderedSet'
+
+    case immutable.Stack:
+      return 'Stack'
+
+    case immutable.Map:
+      return 'Map'
+
+    case immutable.OrderedMap:
+      return 'OrderedMap'
+
+    default:
+      return undefined
+  }
+}
+
 
 function replaceIterable(iter, replaceChild) {
   debug('replaceIterable()', iter)
 
-  const iterableType = iter.constructor.name
+  const iterableType = getIterableType(iter)
+  if (!iterableType) {
+    throw new Error(`Cannot find type of iterable: ${iter}`)
+  }
+
   switch (iterableType) {
   case 'List':
   case 'Set':
@@ -156,13 +185,6 @@ function replaceIterable(iter, replaceChild) {
       mapData.push([ key, replaceChild(key, value) ])
     })
     return { "__iterable": iterableType, "data": mapData }
-
-  default:
-    const iterData = {}
-    iter.forEach((value, key) => {
-      iterData[key] = replaceChild(key, value)
-    })
-    return { "__iterable": iterableType, "data": iterData }
   }
 }
 
