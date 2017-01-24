@@ -1,4 +1,3 @@
-const debug = require('debug')('json-immutable')
 const immutable = require('immutable')
 
 const JSONStreamStringify = require('json-stream-stringify')
@@ -25,7 +24,6 @@ function serialize(data, options = {}) {
     //   Immutable.JS provides its own #toJSON() implementation which does not
     //   preserve map key types.
     patchedData.toJSON = function () {
-      debug('#toJSON()', this)
       return this
     }
 
@@ -48,9 +46,6 @@ function createSerializationStream(data, options = {}) {
 
 
 function replace(key, value) {
-  debug('key:', key)
-  debug('value:', value)
-
   let result = value
 
   if (value instanceof immutable.Record) {
@@ -72,14 +67,10 @@ function replace(key, value) {
     result = replacePlainObject(value, replace)
   }
 
-  debug('result:', result, '\n---')
   return result
 }
 
 function replaceAsync(key, value) {
-  debug('key:', key)
-  debug('value:', value)
-
   let result = value
 
   if (!(value instanceof Promise)) {
@@ -113,13 +104,11 @@ function replaceAsync(key, value) {
     }
   }
 
-  debug('result:', result, '\n---')
   return result
 }
 
 
 function replaceRecord(rec, replaceChild) {
-  debug('replaceRecord()', rec)
   const recordDataMap = rec.toMap()
   const recordData = {}
 
@@ -135,8 +124,6 @@ function replaceRecord(rec, replaceChild) {
 
 
 function replaceIterable(iter, replaceChild) {
-  debug('replaceIterable()', iter)
-
   const iterableType = iter.constructor.name
   switch (iterableType) {
   case 'List':
@@ -168,8 +155,6 @@ function replaceIterable(iter, replaceChild) {
 
 
 function replaceArray(arr, replaceChild) {
-  debug('replaceArray()', arr)
-
   return arr.map((value, index) => {
     return replaceChild(index, value)
   })
@@ -177,8 +162,6 @@ function replaceArray(arr, replaceChild) {
 
 
 function replacePlainObject(obj, replaceChild) {
-  debug('replacePlainObject()', obj)
-
   const objData = {}
   Object.keys(obj).forEach((key) => {
     objData[key] = replaceChild(key, obj[key])

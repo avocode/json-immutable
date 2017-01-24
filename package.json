@@ -10,7 +10,6 @@
     "immutable": "3.x.x"
   },
   "dependencies": {
-    "debug": "2.2.x",
     "json-stream-stringify": "1.5.x"
   },
   "devDependencies": {

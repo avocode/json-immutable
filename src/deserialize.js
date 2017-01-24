@@ -1,4 +1,3 @@
-const debug = require('debug')('json-immutable')
 const immutable = require('immutable')
 
 
