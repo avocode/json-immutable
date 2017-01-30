@@ -134,28 +134,31 @@ function replaceRecord(rec, replaceChild) {
 }
 
 function getIterableType(iterable) {
-  switch (iterable.constructor) {
-    case immutable.List:
-      return 'List'
-
-    case immutable.Set:
-      return 'Set'
-
-    case immutable.OrderedSet:
-      return 'OrderedSet'
-
-    case immutable.Stack:
-      return 'Stack'
-
-    case immutable.Map:
-      return 'Map'
-
-    case immutable.OrderedMap:
-      return 'OrderedMap'
-
-    default:
-      return undefined
+  if (immutable.List.isList(iterable)) {
+    return 'List'
   }
+
+  if (immutable.Stack.isStack(iterable)) {
+    return 'Stack'
+  }
+
+  if (immutable.Set.isSet(iterable)) {
+    if (immutable.OrderedSet.isOrderedSet(iterable)) {
+      return 'OrderedSet'
+    }
+
+    return 'Set'
+  }
+
+  if (immutable.Map.isMap(iterable)) {
+    if (immutable.OrderedMap.isOrderedMap(iterable)) {
+      return 'OrderedMap'
+    }
+
+    return 'Map'
+  }
+
+  return undefined;
 }
 
 
