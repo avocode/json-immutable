@@ -32,7 +32,12 @@ function reviveRecord(key, recInfo, options) {
     throw new Error(`Unknown record type: ${recInfo['__record']}`)
   }
 
-  return new RecordType(revive(key, recInfo['data'], options))
+  let revivedData = revive(key, recInfo['data'], options)
+  if (typeof RecordType.migrate === 'function') {
+    revivedData = RecordType.migrate(revivedData)
+  }
+
+  return new RecordType(revivedData)
 }
 
 
