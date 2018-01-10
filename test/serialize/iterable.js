@@ -189,3 +189,21 @@ it('should serialize an immutable.Stack as an array of values', (test) => {
   test.deepEqual(result['data'], [ 5, 6 ])
 })
 
+
+it('should ignore serializers option', (test) => {
+  const data = immutable.Map({
+    'a': 5,
+    'b': 6,
+  })
+
+  const result = helpers.getSerializationResult(data, {
+    serializers: {
+      'SampleRecord': (data) => `${data}-transformed`,
+    },
+  })
+  test.deepEqual(result['data'], [
+    [ 'a', 5 ],
+    [ 'b', 6 ],
+  ])
+})
+

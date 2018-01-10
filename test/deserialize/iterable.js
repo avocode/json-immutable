@@ -156,3 +156,21 @@ it('should not deserialize an iterable of an unknown type', (test) => {
     test.getDeserializationResult(data)
   })
 })
+
+
+it('should ignore deserializers option', (test) => {
+  const data = {
+    '__iterable': 'Map',
+    'data': [
+      [ 'a', 5 ],
+      [ 'b', 6 ],
+    ],
+  }
+
+  helpers.testDeserialization(test, data, immutable.Map(data['data']), {
+    deserializers: {
+      'Sample': (data) => `${data}-transformed`,
+    },
+  })
+})
+

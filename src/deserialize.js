@@ -1,7 +1,7 @@
 const immutable = require('immutable')
 
 
-function deserialize(json, options = {}) {
+function deserialize(json, options) {
   return JSON.parse(json, (key, value) => {
     return revive(key, value, options)
   })
@@ -9,6 +9,8 @@ function deserialize(json, options = {}) {
 
 
 function revive(key, value, options) {
+  options = options || {}
+  options.deserializers = options.deserializers || {}
   if (typeof value === 'object' && value) {
     if (value['__record']) {
       return reviveRecord(key, value, options)
@@ -34,6 +36,11 @@ function reviveRecord(key, recInfo, options) {
   let revivedData = revive(key, recInfo['data'], options)
   if (typeof RecordType.migrate === 'function') {
     revivedData = RecordType.migrate(revivedData)
+  }
+
+  const deserializer = options.deserializers[recInfo['__record']]
+  if (deserializer && typeof deserializer === 'function') {
+    revivedData = deserializer(revivedData)
   }
 
   return new RecordType(revivedData)

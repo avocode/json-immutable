@@ -3,8 +3,8 @@ import it from 'ava'
 import helpers from './_helpers'
 
 
-function testPlainSerialization(test, data) {
-  return helpers.testSerialization(test, data, data)
+function testPlainSerialization(test, data, options) {
+  return helpers.testSerialization(test, data, data, options)
 }
 
 
@@ -46,5 +46,16 @@ it('should serialize a nested plain object', (test) => {
 it('should serialize an array nested in a plain object', (test) => {
   testPlainSerialization(test, {
     'a': [ 'b', 123 ],
+  })
+})
+
+
+it('should ignore serializers option', (test) => {
+  testPlainSerialization(test, {
+    'a': [ 'b', 123 ],
+  }, {
+    serializers: {
+      'SampleRecord': (data) => `${data}-transformed`,
+    },
   })
 })

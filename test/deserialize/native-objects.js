@@ -23,3 +23,14 @@ it('should deserialize a RegExp object with flags', (test) => {
 
   helpers.testDeserialization(test, data, new RegExp('(what)?\\w+$', 'ig'))
 })
+
+
+it('should ignore deserializers option', (test) => {
+  const data = { '__regexp': '/(what)?\\w+$/ig' }
+
+  helpers.testDeserialization(test, data, new RegExp('(what)?\\w+$', 'ig'), {
+    deserializers: {
+      'Sample': (data) => `${data}-transformed`,
+    },
+  })
+})

@@ -96,6 +96,7 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     - `data`: The data to serialize.
     - `options={}`: Serialization options.
         - `pretty=false`: Whether to pretty-print the result (2 spaces).
+        - `serializers={}`: Object with serialize transformation map (see below)
 
     Return value:
 
@@ -108,6 +109,7 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     - `json`: A JSON representation of data.
     - `options={}`: Deserialization options.
         - `recordTypes={}`: `immutable.Record` factories.
+        - `deserializers={}`: Object with deserialize transformation map (see below)
 
     Return value:
 
@@ -125,9 +127,51 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
         - `bigChunks=false`: Whether the serialized data should only be split into chunks based on the reader speed. By default, each data structure level is processed in its own event loop microtask which.
             - NOTE: When `bigChunks=true`, a (possibly substantial) portion of the data is serialized synchronously.
 
+        - `serializers={}`: Object with serialize transformation map (see below)
+
     Return value:
 
     - `stream.PassThrough<!Buffer>`: A readable stream emitting the JSON representation of the input (`data`).
+
+
+### Custom serialization/deserialization transformations
+
+You can map immutable record names to transformation functions which will be called on that single record. The transformation
+function is utilized as callback from your own application code.
+
+When using `serialize()`, you can pass object containing this map as option `serializers`:
+
+```
+const transformData = (data) => data.set('a', 'transformed') 
+
+JsonImmutable.serialize(dataSet, {
+  serializers: {
+    'SampleRecord': (data) => transformData 
+  },
+})
+```
+
+This options can also be utilized with `createSerializationStream` function.
+This transformation happens just before the Immutable Record is serialized so you
+can utilize instance's methods at this time.
+
+
+Similarly you can transform data when deserializing by passing option `deserializers`:
+
+```
+const transformData = (data) => data['a'] = transformed 
+
+JsonImmutable.deserialize(dataJSON, {
+  recordTypes: 'SampleRecord',
+  deserializers: {
+    'SampleRecord': (data) => transformData 
+  },
+})
+```
+
+The callback is called just before data is transformed into Immutable Record.
+
+NOTE: `serializers` and `deserializers` options only work on Immutable Record instances, nothing else.
 
 ## Running Tests
 

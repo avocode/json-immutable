@@ -26,3 +26,15 @@ it('should serialize a RegExp object with flags', (test) => {
 
   test.is(result['__regexp'], regexp.toString())
 })
+
+
+it('should ignore serializers option', (test) => {
+  const regexp = new RegExp('(what)?\\w+$', 'ig')
+  const result = helpers.getSerializationResult(regexp, {
+    serializers: {
+      'SampleRecord': (data) => `${data}-transformed`,
+    },
+  })
+
+  test.is(result['__regexp'], regexp.toString())
+})

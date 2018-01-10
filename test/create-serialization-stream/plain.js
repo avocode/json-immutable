@@ -48,3 +48,14 @@ it('should serialize an array nested in a plain object', (test) => {
     'a': [ 'b', 123 ],
   })
 })
+
+
+it('should ignore serializers option', (test) => {
+  testPlainSerializationStream(test, {
+    'a': [ 'b', 123 ],
+  }, {
+    serializers: {
+      'SampleRecord': (data) => `${data}-transformed`,
+    },
+  })
+})

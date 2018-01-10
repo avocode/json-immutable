@@ -3,8 +3,8 @@ import it from 'ava'
 import helpers from './_helpers'
 
 
-function testPlainDeserialization(test, data) {
-  return helpers.testDeserialization(test, data, data)
+function testPlainDeserialization(test, data, options) {
+  return helpers.testDeserialization(test, data, data, options)
 }
 
 
@@ -44,6 +44,18 @@ it('should deserialize a nested plain object', (test) => {
 it('should deserialize an array nested in a plain object', (test) => {
   testPlainDeserialization(test, {
     'a': [ 'b', 123 ],
+  })
+})
+
+
+it('should ignore deserializers option', (test) => {
+  testPlainDeserialization(test, {
+    'a': 5,
+    'b': 6,
+  }, {
+    deserializers: {
+      'Sample': (data) => `${data}-transformed`,
+    },
   })
 })
 

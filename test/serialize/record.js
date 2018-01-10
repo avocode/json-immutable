@@ -127,3 +127,94 @@ it('should preserve key types of an immutable.Map in immutable.Record data',
     [ true, 'b' ],
   ])
 })
+
+
+it('should apply serializer for incoming data if option is present',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 5,
+    'b': 6,
+  }, 'SampleRecord')
+
+  const data = SampleRecord()
+  const options = {
+    serializers: {
+      'SampleRecord': (data) => {
+        return data.set('a', '5-transformed').set('b', '6-transformed')
+      },
+    }
+  }
+  const result = helpers.getSerializationResult(data, options)
+
+  helpers.testSerialization(test, data, {
+    '__record': 'SampleRecord',
+    'data': {
+      'a': '5-transformed',
+      'b': '6-transformed',
+    }
+  }, options)
+})
+
+
+it('should apply serializer only for specified record classes', (test) => {
+  const SampleRecord1 = immutable.Record({
+    'a': 5,
+    'b': 6,
+  }, 'SampleRecord1')
+
+  const SampleRecord2 = immutable.Record({
+    'a': 7,
+    'b': 8,
+  }, 'SampleRecord2')
+
+  const SampleRecord3 = immutable.Record({
+    'x': 10,
+    'y': 20,
+  }, 'SampleRecord3')
+
+  const data = immutable.Map({
+    's1': SampleRecord1(),
+    's2': SampleRecord2(),
+    's3': SampleRecord3(),
+  })
+
+  const options = {
+    serializers: {
+      'SampleRecord1': (data) => {
+        return data.set('a', '5-transformed').set('b', '6-transformed')
+      },
+      'SampleRecord3': (data) => {
+        return data.set('x', data.get('x') + 10)
+                   .set('y', data.get('y') + 10)
+      },
+    }
+  }
+  const result = helpers.getSerializationResult(data, options)
+
+  test.deepEqual(result, {
+    '__iterable': 'Map',
+    'data': [
+      ['s1', {
+        '__record': 'SampleRecord1',
+        'data': {
+          'a': '5-transformed',
+          'b': '6-transformed',
+        }
+      }],
+      ['s2', {
+        '__record': 'SampleRecord2',
+        'data': {
+          'a': 7,
+          'b': 8,
+        }
+      }],
+      ['s3', {
+        '__record': 'SampleRecord3',
+        'data': {
+          'x': 20,
+          'y': 30,
+        }
+      }],
+    ]
+  })
+})

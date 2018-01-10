@@ -21,11 +21,12 @@ exports.testSerializationStream = function (test, data, expectedResult) {
   })
 }
 
-exports.getSerializationStreamResult = function (data, options) {
-  const littleChunkedData = getSerializationStreamDataWithOptions(data, {})
-  const bigChunkedData = getSerializationStreamDataWithOptions(data, {
+exports.getSerializationStreamResult = function (data, options = {}) {
+  const littleChunkedData = getSerializationStreamDataWithOptions(data, options)
+  options = Object.assign(options, {
     bigChunks: true,
   })
+  const bigChunkedData = getSerializationStreamDataWithOptions(data, options)
 
   return littleChunkedData.then((littleChunkedData) => {
     return bigChunkedData.then((bigChunkedData) => {
