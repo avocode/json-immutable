@@ -1,6 +1,19 @@
-import { List, Map, OrderedMap, OrderedSet, Set, Stack } from 'immutable';
+import {
+  Collection,
+  List,
+  Map,
+  OrderedMap,
+  OrderedSet,
+  Record,
+  Set,
+  Stack,
+} from 'immutable';
 import { DeserializationOptions } from '../types/options';
-import { SerializedIterable, SerializedRecord } from '../types/serializedData';
+import {
+  SerializedCollection,
+  SerializedRecord,
+} from '../types/serializedData';
+import { getUniqueId } from './getUniqueId';
 
 export function decodeData(
   key: string,
@@ -10,8 +23,8 @@ export function decodeData(
   if (typeof value === 'object' && value) {
     if (value.__record) {
       return decodeRecord(key, value, options);
-    } else if (value.__iterable) {
-      return decodeIterable(key, value, options);
+    } else if (value.__collection) {
+      return decodeCollection(key, value, options);
     } else if (value.__date) {
       return new Date(value.__date);
     } else if (value.__regexp) {
@@ -22,59 +35,68 @@ export function decodeData(
   return value;
 }
 
+const getUniqueAnonymousRecordId = getUniqueId('AnonymousRecord');
+
 function decodeRecord(
   key: string,
   recInfo: SerializedRecord,
   options: DeserializationOptions,
 ) {
   const { __record: recordName, data } = recInfo;
-  const { recordTypes = {} } = options;
+  const { recordTypes = {}, throwOnMissingRecordType = true } = options;
   const RecordType = recordTypes[recordName];
-  if (!RecordType) {
+  if (!RecordType && throwOnMissingRecordType) {
     throw new Error(`Unknown record type: ${recordName}`);
   }
 
   let decodedData: any = decodeData(key, data, options);
-  if (typeof (RecordType as any).migrate === 'function') {
+  if (!!RecordType && typeof (RecordType as any).migrate === 'function') {
     decodedData = (RecordType as any).migrate(decodedData);
   }
 
-  return new RecordType(decodedData);
+  let record;
+  if (!RecordType) {
+    // If the record type does not exist, create an AnonymousRecord
+    // that contains all of the keys in the decodedData with a default of
+    // undefined
+    const defaultsForAnonymousRecord = Object.keys(decodedData).reduce(
+      (defaults, dataKey: string) => {
+        defaults[dataKey] = undefined;
+        return defaults;
+      },
+      {} as any,
+    );
+    record = new (Record(
+      defaultsForAnonymousRecord,
+      getUniqueAnonymousRecordId(),
+    ))(decodedData);
+  } else {
+    record = new RecordType(decodedData);
+  }
+
+  return record;
 }
 
-function decodeIterable(
+const collectionTypeToConstructor = {
+  List,
+  Map,
+  OrderedMap,
+  OrderedSet,
+  Set,
+  Stack,
+};
+
+function decodeCollection(
   key: string,
-  iterInfo: SerializedIterable,
+  iterInfo: SerializedCollection,
   options: DeserializationOptions,
-):
-  | Map<any, any>
-  | Set<any>
-  | List<any>
-  | OrderedSet<any>
-  | Stack<any>
-  | OrderedMap<any, any>
-  | never {
-  const { __iterable: iterableType, data } = iterInfo;
-  switch (iterableType) {
-    case 'List':
-      return List(decodeData(key, data, options));
+): Collection<any, any> | never {
+  const { __collection: collectionType, data } = iterInfo;
+  const CollectionConstructor = collectionTypeToConstructor[collectionType];
 
-    case 'Set':
-      return Set(decodeData(key, data, options));
-
-    case 'OrderedSet':
-      return OrderedSet(decodeData(key, data, options));
-
-    case 'Stack':
-      return Stack(decodeData(key, data, options));
-
-    case 'Map':
-      return Map(decodeData(key, data, options));
-
-    case 'OrderedMap':
-      return OrderedMap(decodeData(key, data, options));
-
-    default:
-      throw new Error(`Unknown iterable type: ${iterableType}`);
+  if (!CollectionConstructor) {
+    throw new Error(`Unknown collection type: ${collectionType}`);
   }
+
+  return (CollectionConstructor as any)(decodeData(key, data, options));
 }

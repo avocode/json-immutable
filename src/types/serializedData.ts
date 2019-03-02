@@ -1,7 +1,7 @@
-import { IterableType } from './iterableTypes';
+import { CollectionType } from './collectionTypes';
 
-export interface SerializedIterable {
-  __iterable: IterableType;
+export interface SerializedCollection {
+  __collection: CollectionType;
   data: any[] | Array<[string | number, any]>;
 }
 

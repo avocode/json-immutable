@@ -1,15 +1,18 @@
-import { Iterable, Record } from 'immutable';
-import { SerializedIterable, SerializedRecord } from '../types/serializedData';
-import { getIterableType } from './iterables';
+import { Collection, isCollection, Record } from 'immutable';
+import {
+  SerializedCollection,
+  SerializedRecord,
+} from '../types/serializedData';
+import { getCollectionType } from './collections';
 import { isDate, isRegExp } from './nativeTypes';
 
 export function serializeData(_key: string | number, value: any): any {
   let result = value;
 
-  if (value instanceof Record) {
+  if (Record.isRecord(value)) {
     result = serializeRecord(value as any, serializeData);
-  } else if (Iterable.isIterable(value)) {
-    result = serializeIterable(value, serializeData);
+  } else if (isCollection(value)) {
+    result = serializeCollection(value, serializeData);
   } else if (Array.isArray(value)) {
     result = serializeArray(value, serializeData);
   } else if (isDate(value)) {
@@ -44,50 +47,67 @@ export function serializePlainObject(
   return objData;
 }
 
-export function serializeIterable(
-  iter: Iterable<any, any>,
+function serializeListLikeData(
+  collection: Collection<any, any>,
   serializeChild: typeof serializeData,
-): SerializedIterable | never {
-  const iterableType = getIterableType(iter);
-  if (!iterableType) {
-    throw new Error(`Cannot find type of iterable: ${iter}`);
+): any[] {
+  const listData: any[] = [];
+  collection.forEach((value, key) => {
+    listData.push(serializeChild(key, value));
+  });
+  return listData;
+}
+
+function serializeMapLikeData(
+  collection: Collection<any, any>,
+  serializeChild: typeof serializeData,
+): Array<[string | number, any]> {
+  const mapData: Array<[string | number, any]> = [];
+  collection.forEach((value, key) => {
+    mapData.push([key, serializeChild(key, value)]);
+  });
+  return mapData;
+}
+
+const collectionToSerializer = {
+  List: serializeListLikeData,
+  OrderedSet: serializeListLikeData,
+  Set: serializeListLikeData,
+  Stack: serializeListLikeData,
+
+  Map: serializeMapLikeData,
+  OrderedMap: serializeMapLikeData,
+};
+
+export function serializeCollection(
+  collection: Collection<any, any>,
+  serializeChild: typeof serializeData,
+): SerializedCollection | never {
+  const collectionType = getCollectionType(collection);
+  if (!collectionType) {
+    throw new Error(`Cannot find type of collection: ${collection}`);
   }
 
-  switch (iterableType) {
-    case 'List':
-    case 'Set':
-    case 'OrderedSet':
-    case 'Stack':
-      const listData: any[] = [];
-      iter.forEach((value, key) => {
-        listData.push(serializeChild(key, value));
-      });
-      return { __iterable: iterableType, data: listData };
-
-    case 'Map':
-    case 'OrderedMap':
-      const mapData: Array<[string | number, any]> = [];
-      iter.forEach((value, key) => {
-        mapData.push([key, serializeChild(key, value)]);
-      });
-      return { __iterable: iterableType, data: mapData };
-    default:
-      return {} as any;
-  }
+  return {
+    __collection: collectionType,
+    data: collectionToSerializer[collectionType](collection, serializeChild),
+  };
 }
 
 export function serializeRecord(
-  record: Iterable<string, any>,
+  record: Record<any>,
   serializeChild: typeof serializeData,
 ): SerializedRecord | any {
-  const recordDataMap = record.toMap();
   const recordData: { [key: string]: any } = {};
 
-  recordDataMap.forEach((value, key) => {
-    recordData[key!] = serializeChild(key!, value);
+  record.toSeq().forEach((value, key) => {
+    recordData[key as string] = serializeChild(key as string, value);
   });
 
-  const recordName = (record as any)._name;
+  const recordName =
+    Record.getDescriptiveName(record) ||
+    (record as any).displayName ||
+    (record as any)._name;
 
   if (!recordName) {
     return recordData;
@@ -103,16 +123,16 @@ export function serializeDataAsync(_key: string | number, value: any) {
   let result = value;
 
   if (!(value instanceof Promise)) {
-    if (value instanceof Record) {
+    if (Record.isRecord(value)) {
       result = new Promise((resolve) => {
         setImmediate(() => {
           resolve(serializeRecord(value as any, serializeDataAsync));
         });
       });
-    } else if (Iterable.isIterable(value)) {
+    } else if (isCollection(value)) {
       result = new Promise((resolve) => {
         setImmediate(() => {
-          resolve(serializeIterable(value, serializeDataAsync));
+          resolve(serializeCollection(value, serializeDataAsync));
         });
       });
     } else if (Array.isArray(value)) {
