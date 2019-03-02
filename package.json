@@ -1,22 +1,44 @@
 {
   "name": "json-immutable",
-  "version": "0.4.0",
-  "main": "lib/index",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "prepublish": "babel src/ -d lib/",
-    "test": "npm run prepublish && ava"
+    "build": "tsc",
+    "lint-fix": "tslint -c ./tslint.json --project ./tsconfig.json --fix",
+    "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
+    "prettier": "prettier \"src/**/*.{js,jsx,ts,tsx}\" --write",
+    "test": "npm run build && ava",
+    "typecheck": "tsc --noEmit --listFiles false"
+  },
+  "lint-staged": {
+    "{src}/**/*.{ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "echo 'Running TSLint' && npm run lint && echo 'Running Typechecks' && npm run typecheck"
+    }
   },
   "peerDependencies": {
     "immutable": "3.x.x"
   },
   "dependencies": {
-    "json-stream-stringify": "1.5.x"
+    "@types/node": "^11.10.0",
+    "json-stream-stringify": "^1.5.x"
   },
   "devDependencies": {
-    "ava": "0.16.x",
-    "babel-cli": "6.14.x",
-    "babel-preset-es2015": "6.14.x",
-    "immutable": "3.8.x"
+    "ava": "^1.2.1",
+    "husky": "^1.3.1",
+    "immutable": "3.8.x",
+    "lint-staged": "^8.1.5",
+    "prettier": "^1.16.4",
+    "tslint": "^5.13.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.3.3333"
   },
   "repository": {
     "type": "git",
