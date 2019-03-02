@@ -7,7 +7,7 @@
     "build": "tsc",
     "lint-fix": "tslint -c ./tslint.json --project ./tsconfig.json --fix",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
-    "prettier": "prettier \"src/**/*.{js,jsx,ts,tsx}\" --write",
+    "prettier": "prettier \"{src,test}/**/*.{js,jsx,ts,tsx}\" --write",
     "test": "npm run build && ava",
     "typecheck": "tsc --noEmit --listFiles false"
   },

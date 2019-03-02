@@ -1,25 +1,21 @@
-import it from 'ava'
+import it from 'ava';
 
-import helpers from './_helpers'
-
-
+import helpers from './_helpers';
 
 it('should deserialize a Date object', (test) => {
-  const data = { '__date': '2016-09-08T00:01:02Z' }
+  const data = { __date: '2016-09-08T00:01:02Z' };
 
-  helpers.testDeserialization(test, data, new Date(data['__date']))
-})
-
+  helpers.testDeserialization(test, data, new Date(data['__date']));
+});
 
 it('should deserialize a RegExp object', (test) => {
-  const data = { '__regexp': '/(what)?\\w+$/' }
+  const data = { __regexp: '/(what)?\\w+$/' };
 
-  helpers.testDeserialization(test, data, new RegExp('(what)?\\w+$'))
-})
-
+  helpers.testDeserialization(test, data, new RegExp('(what)?\\w+$'));
+});
 
 it('should deserialize a RegExp object with flags', (test) => {
-  const data = { '__regexp': '/(what)?\\w+$/ig' }
+  const data = { __regexp: '/(what)?\\w+$/ig' };
 
-  helpers.testDeserialization(test, data, new RegExp('(what)?\\w+$', 'ig'))
-})
+  helpers.testDeserialization(test, data, new RegExp('(what)?\\w+$', 'ig'));
+});
