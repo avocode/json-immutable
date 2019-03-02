@@ -107,21 +107,6 @@ it('should serialize an immutable.OrderedMap as an array of entries', (test) => 
   ])
 })
 
-
-it('should serialize an immutable.Map as an array of entries', (test) => {
-  const data = immutable.Map({
-    'a': 5,
-    'b': 6,
-  })
-
-  const result = helpers.getSerializationResult(data)
-  test.deepEqual(result['data'], [
-    [ 'a', 5 ],
-    [ 'b', 6 ],
-  ])
-})
-
-
 it('should mark an immutable.List as __iterable=List', (test) => {
   const data = immutable.List.of(5, 6)
 
