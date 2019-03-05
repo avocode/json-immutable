@@ -1,5 +1,5 @@
 import {
-  Iterable,
+  Collection,
   List,
   Map,
   OrderedMap,
@@ -7,11 +7,11 @@ import {
   Set,
   Stack,
 } from 'immutable';
-import { IterableType } from '../types/iterableTypes';
+import { CollectionType } from '../types/collectionTypes';
 
-export function getIterableType(
-  iterable: Iterable<string | number, any>,
-): IterableType | undefined {
+export function getCollectionType(
+  iterable: Collection<string | number, any>,
+): CollectionType | undefined {
   if (List.isList(iterable)) {
     return 'List';
   }

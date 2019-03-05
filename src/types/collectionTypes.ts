@@ -1,4 +1,4 @@
-export type IterableType =
+export type CollectionType =
   | 'List'
   | 'Map'
   | 'OrderedMap'

@@ -7,7 +7,7 @@
     "build": "tsc",
     "lint-fix": "tslint -c ./tslint.json --project ./tsconfig.json --fix",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
-    "prettier": "prettier \"src/**/*.{js,jsx,ts,tsx}\" --write",
+    "prettier": "prettier \"{src,test}/**/*.{js,jsx,ts,tsx}\" --write",
     "test": "npm run build && ava",
     "typecheck": "tsc --noEmit --listFiles false"
   },
@@ -24,7 +24,7 @@
     }
   },
   "peerDependencies": {
-    "immutable": "3.x.x"
+    "immutable": "^4.0.0-rc.12"
   },
   "dependencies": {
     "@types/node": "^11.10.0",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "ava": "^1.2.1",
     "husky": "^1.3.1",
-    "immutable": "3.8.x",
+    "immutable": "^4.0.0-rc.12",
     "lint-staged": "^8.1.5",
     "prettier": "^1.16.4",
     "tslint": "^5.13.1",

@@ -1,4 +1,4 @@
-import { Iterable, Record } from 'immutable';
+import { isCollection, Record } from 'immutable';
 import JSONStreamStringify from 'json-stream-stringify';
 import {
   SerializationOptions,
@@ -15,8 +15,8 @@ export function serialize(
   options: SerializationOptions = {},
 ): string | never {
   if (
-    Iterable.isIterable(data) ||
-    data instanceof Record ||
+    isCollection(data) ||
+    Record.isRecord(data) ||
     isSupportedNativeType(data)
   ) {
     const patchedData = Object.create(data);

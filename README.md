@@ -75,7 +75,7 @@ const data = {
 
 // Serialization
 const json = serialize(data)
-// json == '{"x":{"__iterable":"Map","data":[["y",{"__iterable":"List","data":[1,2,3]"}]]}}'
+// json == '{"x":{"__collection":"Map","data":[["y",{"__collection":"List","data":[1,2,3]"}]]}}'
 
 // Deserialize
 const result = deserialize(json)
@@ -108,6 +108,7 @@ NOTE: When an unknown Immutable iterable type is encountered during deserializat
     - `json`: A JSON representation of data.
     - `options={}`: Deserialization options.
         - `recordTypes={}`: `immutable.Record` factories.
+        - `throwOnMissingRecordType=true`: Creates an `AnonymousRecord` for missing RecordTypes with all decoded data keys.
 
     Return value:
 

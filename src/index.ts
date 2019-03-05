@@ -3,4 +3,4 @@ export * from './serialize';
 
 export * from './types/options';
 export * from './types/serializedData';
-export * from './types/iterableTypes';
+export * from './types/collectionTypes';

@@ -10,5 +10,6 @@ export interface SerializationStreamOptions {
 }
 
 export interface DeserializationOptions {
-  recordTypes?: { [recordName: string]: Record.Class };
+  recordTypes?: { [recordName: string]: ReturnType<typeof Record> };
+  throwOnMissingRecordType?: boolean;
 }
