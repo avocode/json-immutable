@@ -109,7 +109,7 @@ function replaceAsync(key, value) {
 
 
 function replaceRecord(rec, replaceChild) {
-  const recordDataMap = rec.toMap()
+  const recordDataMap = rec.toSeq()
   const recordData = {}
 
   recordDataMap.forEach((value, key) => {
