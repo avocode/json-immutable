@@ -26,8 +26,13 @@ function revive(key, value, options) {
 
 
 function reviveRecord(key, recInfo, options) {
-  const RecordType = options.recordTypes[recInfo['__record']]
+  const recordName = recInfo['__record']
+  const RecordType = options.recordTypes[recordName]
   if (!RecordType) {
+    if (options.deprecatedRecordTypes && options.deprecatedRecordTypes.indexOf(recordName) > -1) {
+      return undefined
+    }
+
     throw new Error(`Unknown record type: ${recInfo['__record']}`)
   }
 
