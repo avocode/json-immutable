@@ -66,6 +66,43 @@ it('should not deserialize a record of an unknown type', (test) => {
 })
 
 
+it('should discard a deprecated record', (test) => {
+  const data = {
+    'rec': {
+      '__record': 'SampleRecord',
+      'data': {
+        'a': 5,
+        'b': 6,
+      },
+    },
+  }
+
+  helpers.testDeserialization(test, data, {}, {
+    recordTypes: {},
+    deprecatedRecordTypes: [ 'SampleRecord' ],
+  })
+})
+
+
+it('should preserve other data on encountering a deprecated record', (test) => {
+  const data = {
+    'rec': {
+      '__record': 'SampleRecord',
+      'data': {
+        'a': 5,
+        'b': 6,
+      },
+    },
+    'other': 'data',
+  }
+
+  helpers.testDeserialization(test, data, { 'other': 'data' }, {
+    recordTypes: {},
+    deprecatedRecordTypes: [ 'SampleRecord' ],
+  })
+})
+
+
 it('should deserialize nested records of known types', (test) => {
   const RecordA = immutable.Record({
     'a': 1,
