@@ -127,3 +127,159 @@ it('should preserve key types of an immutable.Map in immutable.Record data',
     [ true, 'b' ],
   ])
 })
+
+
+it('should include default unnamed record key values by default',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  })
+
+  const data = SampleRecord({ 'a': 3 })
+  const result = helpers.getSerializationResult(data)
+
+  test.deepEqual(result, {
+    'a': 3,
+    'b': 2,
+  })
+})
+
+
+it('should not include default unnamed record key values when they should be omitted',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  })
+
+  const data = SampleRecord({ 'a': 3 })
+  const result = helpers.getSerializationResult(data, {
+    omitDefaultRecordValues: true,
+  })
+
+  test.deepEqual(result, {
+    'a': 3,
+  })
+})
+
+
+it('should include default named record key values by default',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  }, 'X')
+
+  const data = SampleRecord({ 'a': 3 })
+  const result = helpers.getSerializationResult(data)
+
+  test.deepEqual(result['data'], {
+    'a': 3,
+    'b': 2,
+  })
+})
+
+
+it('should not include default named record key values when they should be omitted',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  }, 'X')
+
+  const data = SampleRecord({ 'a': 3 })
+  const result = helpers.getSerializationResult(data, {
+    omitDefaultRecordValues: true,
+  })
+
+  test.deepEqual(result['data'], {
+    'a': 3,
+  })
+})
+
+
+it('should not include default record key values of records ' +
+    'nested within plain objects when they should be omitted',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  }, 'X')
+
+  const data = {
+    'x': SampleRecord({ 'a': 3 }),
+  }
+  const result = helpers.getSerializationResult(data, {
+    omitDefaultRecordValues: true,
+  })
+
+  test.deepEqual(result['x']['data'], {
+    'a': 3,
+  })
+})
+
+
+it('should not include default record key values of records ' +
+    'nested within arrays when they should be omitted',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  }, 'X')
+
+  const data = [
+    SampleRecord({ 'a': 3 }),
+  ]
+  const result = helpers.getSerializationResult(data, {
+    omitDefaultRecordValues: true,
+  })
+
+  test.deepEqual(result[0]['data'], {
+    'a': 3,
+  })
+})
+
+
+it('should not include default record key values of records ' +
+    'nested within immutable lists when they should be omitted',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+  }, 'X')
+
+  const data = immutable.List([
+    SampleRecord({ 'a': 3 }),
+  ])
+  const result = helpers.getSerializationResult(data, {
+    omitDefaultRecordValues: true,
+  })
+
+  test.deepEqual(result['data'][0]['data'], {
+    'a': 3,
+  })
+})
+
+
+it('should not include default record key values of records ' +
+    'nested within immutable lists when they should be omitted',
+    (test) => {
+  const SampleRecord = immutable.Record({
+    'a': 1,
+    'b': 2,
+    'child': null,
+  }, 'X')
+
+  const data = SampleRecord({
+    'a': 3,
+    'child': SampleRecord({ 'a': 4 }),
+  })
+  const result = helpers.getSerializationResult(data, {
+    omitDefaultRecordValues: true,
+  })
+
+  test.deepEqual(result['data']['child']['data'], {
+    'a': 4,
+  })
+})
