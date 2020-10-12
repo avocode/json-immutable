@@ -32,7 +32,9 @@ function serialize(data, options = {}) {
 
   const indentation = options.pretty ? 2 : 0
 
-  return JSON.stringify(data, replace, indentation)
+  return JSON.stringify(data, (key, value) => {
+    return replace(key, value, options)
+  }, indentation)
 }
 
 
@@ -45,17 +47,17 @@ function createSerializationStream(data, options = {}) {
 }
 
 
-function replace(key, value) {
+function replace(key, value, options = {}) {
   let result = value
 
   if (value instanceof immutable.Record) {
-    result = replaceRecord(value, replace)
+    result = replaceRecord(value, replace, options)
   }
   else if (immutable.Iterable.isIterable(value)) {
-    result = replaceIterable(value, replace)
+    result = replaceIterable(value, replace, options)
   }
   else if (Array.isArray(value)) {
-    result = replaceArray(value, replace)
+    result = replaceArray(value, replace, options)
   }
   else if (nativeTypeHelpers.isDate(value)) {
     result = { '__date': value.toISOString() }
@@ -64,41 +66,41 @@ function replace(key, value) {
     result = { '__regexp': value.toString() }
   }
   else if (typeof value === 'object' && value !== null) {
-    result = replacePlainObject(value, replace)
+    result = replacePlainObject(value, replace, options)
   }
 
   return result
 }
 
-function replaceAsync(key, value) {
+function replaceAsync(key, value, options = {}) {
   let result = value
 
   if (!(value instanceof Promise)) {
     if (value instanceof immutable.Record) {
       result = new Promise((resolve) => {
         setImmediate(() => {
-          resolve(replaceRecord(value, replaceAsync))
+          resolve(replaceRecord(value, replaceAsync, options))
         })
       })
     }
     else if (immutable.Iterable.isIterable(value)) {
       result = new Promise((resolve) => {
         setImmediate(() => {
-          resolve(replaceIterable(value, replaceAsync))
+          resolve(replaceIterable(value, replaceAsync, options))
         })
       })
     }
     else if (Array.isArray(value)) {
       result = new Promise((resolve) => {
         setImmediate(() => {
-          resolve(replaceArray(value, replaceAsync))
+          resolve(replaceArray(value, replaceAsync, options))
         })
       })
     }
     else if (typeof value === 'object' && value !== null) {
       result = new Promise((resolve) => {
         setImmediate(() => {
-          resolve(replacePlainObject(value, replaceAsync))
+          resolve(replacePlainObject(value, replaceAsync, options))
         })
       })
     }
@@ -108,12 +110,16 @@ function replaceAsync(key, value) {
 }
 
 
-function replaceRecord(rec, replaceChild) {
+function replaceRecord(rec, replaceChild, options = {}) {
+  const emptyRec = new rec.constructor()
+
   const recordDataMap = rec.toMap()
   const recordData = {}
 
-  recordDataMap.forEach((value, key) => {
-    recordData[key] = replaceChild(key, value)
+  recordDataMap.forEach(function (value, key) {
+    if (!options.omitDefaultRecordValues || value !== emptyRec.get(key)) {
+      recordData[key] = replaceChild(key, value, options)
+    }
   })
 
   if (!rec._name) {
@@ -151,7 +157,7 @@ function getIterableType(iterable) {
 }
 
 
-function replaceIterable(iter, replaceChild) {
+function replaceIterable(iter, replaceChild, options = {}) {
   const iterableType = getIterableType(iter)
   if (!iterableType) {
     throw new Error(`Cannot find type of iterable: ${iter}`)
@@ -164,7 +170,7 @@ function replaceIterable(iter, replaceChild) {
   case 'Stack':
     const listData = []
     iter.forEach((value, key) => {
-      listData.push(replaceChild(key, value))
+      listData.push(replaceChild(key, value, options))
     })
     return { "__iterable": iterableType, "data": listData }
 
@@ -172,24 +178,24 @@ function replaceIterable(iter, replaceChild) {
   case 'OrderedMap':
     const mapData = []
     iter.forEach((value, key) => {
-      mapData.push([ key, replaceChild(key, value) ])
+      mapData.push([ key, replaceChild(key, value, options) ])
     })
     return { "__iterable": iterableType, "data": mapData }
   }
 }
 
 
-function replaceArray(arr, replaceChild) {
+function replaceArray(arr, replaceChild, options = {}) {
   return arr.map((value, index) => {
-    return replaceChild(index, value)
+    return replaceChild(index, value, options)
   })
 }
 
 
-function replacePlainObject(obj, replaceChild) {
+function replacePlainObject(obj, replaceChild, options = {}) {
   const objData = {}
   Object.keys(obj).forEach((key) => {
-    objData[key] = replaceChild(key, obj[key])
+    objData[key] = replaceChild(key, obj[key], options)
   })
 
   return objData
